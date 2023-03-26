@@ -25,3 +25,9 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+#hiding key for API
+/src/utils/key.json
+
+#avoiding "Unknown at rule @import-normalize css(unknownAtRules)"
+css.lint.unknownAtRules
