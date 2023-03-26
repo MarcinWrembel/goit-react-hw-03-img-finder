@@ -17,6 +17,8 @@ axios.defaults.baseURL = `https://pixabay.com/api`;
 
 const KEY = Object.values(key);
 
+let params = '';
+
 const INITIAL_STATE = {
   images: [],
   query: '',
@@ -35,27 +37,28 @@ class App extends Component {
     ...INITIAL_STATE,
   };
 
-  handleSubmit = async query => {
+  handleSubmit = async (query, firstPage) => {
     if (this.state.query !== query) {
       this.setState({ query, images: [], page: 1, isLastPage: false });
-    }
+      params = `/?q=${query}&page=1&key=${KEY}&image_type=photo&orientation=horizontal&per_page=${this.state.perPage}`;
+    } else
+      params = `/?q=${query}&page=${this.state.page}&key=${KEY}&image_type=photo&orientation=horizontal&per_page=${this.state.perPage}`;
 
     //starts with loading status
     this.setState({ isLoading: true });
 
-    const params = `/?q=${query}&page=${this.state.page}&key=${KEY}&image_type=photo&orientation=horizontal&per_page=${this.state.perPage}`;
-
     try {
+      //invoking fetching images
       const images = await fetchImages(params);
-      // console.log(images);
+
+      //setting new state values
       this.setState({
         images: images.hits,
         totalHits: images.totalHits,
         isLastPage: this.checkIfLastPage(images.totalHits),
       });
 
-      console.log(this.props);
-
+      //changing state and add new images to existing ones on load more btn
       if (images && images.hits.length > 0) {
         this.setState(() => {
           return {
@@ -66,6 +69,7 @@ class App extends Component {
         });
       }
     } catch (error) {
+      //handling error
       this.setState({ error });
 
       toast.error(error.message, {
@@ -78,21 +82,25 @@ class App extends Component {
         theme: 'light',
       });
     } finally {
+      // changing state for laoder independently on promise (fetchImages) return
       this.setState({ isLoading: false });
     }
   };
 
+  //method to return isLastPage (boolean) basing on number of hits for searching
   checkIfLastPage = totalHits => {
     const noOfPages = Math.ceil(totalHits / this.state.perPage);
-    const lastPage = noOfPages === this.state.page;
+    const isLastPage = noOfPages === this.state.page;
 
-    return lastPage;
+    return isLastPage;
   };
 
+  //method to show modal basing on isModalVisible state value
   showModal = largeImg => {
     this.setState({ isModalVisible: true, largeImageURL: largeImg });
   };
 
+  //method to show modal basing on isModalVisible state value
   hideModal = () => {
     this.setState({
       isModalVisible: false, //!this.state.isModalVisible,
@@ -102,9 +110,11 @@ class App extends Component {
 
   loadMore = async e => {
     e.preventDefault();
+
     this.handleSubmit(this.state.query);
   };
 
+  //method to show info if maximum number of images is loaded
   messageIfMax = () => {
     toast.info("You've have reached maximumnumber of images ", {
       position: 'top-right',
@@ -129,9 +139,6 @@ class App extends Component {
       totalHits,
       isLastPage,
     } = this.state;
-
-    // console.log('last page:', this.state.isLastPage);
-    console.log(page);
 
     return (
       <div className="App">
