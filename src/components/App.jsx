@@ -116,7 +116,7 @@ class App extends Component {
 
   //method to show info if maximum number of images is loaded
   messageIfMax = () => {
-    toast.info("You've have reached maximumnumber of images ", {
+    toast.info("You've have reached maximum number of images ", {
       position: 'top-right',
       autoClose: 2000,
       hideProgressBar: false,
